@@ -1,0 +1,393 @@
+{
+  "name": "N8NATE Certificate Automation Manual Workflow",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "1351eb2a-6dfd-41ba-9d65-174cf6f6578b",
+      "name": "When clicking ‘Execute workflow’",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "REPLACE_WITH_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "REPLACE_WITH_SHEET_NAME",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "770c251f-24af-4062-88f8-a99d44676260",
+      "name": "Get row(s) in sheet1",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        180,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "n8nate-status-pending",
+              "leftValue": "={{ $json['Status'] }}",
+              "rightValue": "Pending",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "09587448-8778-43f0-9661-df4361a1b4f3",
+      "name": "If1",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        360,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "REPLACE_WITH_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "REPLACE_WITH_SHEET_NAME",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Status": "Processing",
+            "Participant Email": "={ $('Get row(s) in sheet1').item.json['Participant Email'] }"
+          },
+          "matchingColumns": [
+            "Participant Email"
+          ],
+          "schema": []
+        },
+        "options": {}
+      },
+      "id": "ec841f14-bd64-4837-9959-268c5f2304fa",
+      "name": "Update row in sheet4",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        540,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://raw.githubusercontent.com/abdulfadhil/n8nate-certificate-automation/main/Assets/Certificate%20Template.jpg",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "data"
+            }
+          }
+        }
+      },
+      "id": "89af0fd8-856a-45cb-9964-e59c706e300a",
+      "name": "Download Template Image1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        720,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "text": "={{ $('Get row(s) in sheet1').item.json['Participant Name'] }}",
+        "fontSize": 45,
+        "positionX": 430,
+        "positionY": 405,
+        "options": {},
+        "dataPropertyName": "data"
+      },
+      "id": "0c484278-edd6-498a-ad62-16ea81a1e4e8",
+      "name": "Edit Image Name1",
+      "type": "n8n-nodes-base.editImage",
+      "typeVersion": 1,
+      "position": [
+        900,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "text": "={{ $('Get row(s) in sheet1').item.json['Course name'] }}",
+        "fontSize": 20,
+        "positionX": 500,
+        "positionY": 585,
+        "options": {},
+        "dataPropertyName": "data"
+      },
+      "id": "a0dc41ff-5ed7-46fb-ba44-f6ac5a2f7f79",
+      "name": "Edit Image course1",
+      "type": "n8n-nodes-base.editImage",
+      "typeVersion": 1,
+      "position": [
+        1080,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "text": "={{ $('Get row(s) in sheet1').item.json['Completion Date'] }}",
+        "fontSize": 20,
+        "positionX": 570,
+        "positionY": 805,
+        "options": {},
+        "dataPropertyName": "data"
+      },
+      "id": "37f743ea-5362-4b63-af8e-48e546f2043b",
+      "name": "Edit Image Date1",
+      "type": "n8n-nodes-base.editImage",
+      "typeVersion": 1,
+      "position": [
+        1260,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Get row(s) in sheet1').item.json['Participant Email'] }}",
+        "subject": "=Your certificate: {{ $('Get row(s) in sheet1').item.json['Participant Name'] }}",
+        "message": "=Hello {{ $('Get row(s) in sheet1').item.json['Participant Name'] }},\\n\\nYour certificate is attached. Thank you for taking part.\\n\\nBest regards",
+        "options": {
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {
+                "property": "data"
+              }
+            ]
+          }
+        },
+        "resource": "message",
+        "operation": "send"
+      },
+      "id": "994b8f73-2efe-4e70-bee0-766952db02b7",
+      "name": "Send a message1",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1440,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "REPLACE_WITH_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "REPLACE_WITH_SHEET_NAME",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Status": "Sent",
+            "Participant Email": "={ $('Get row(s) in sheet1').item.json['Participant Email'] }"
+          },
+          "matchingColumns": [
+            "Participant Email"
+          ],
+          "schema": []
+        },
+        "options": {}
+      },
+      "id": "719c4d18-7170-4911-be66-eed1826232a3",
+      "name": "Update row in sheet3",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1620,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "REPLACE_WITH_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "REPLACE_WITH_SHEET_NAME",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Status": "={ $('Get row(s) in sheet1').item.json['Status'] }",
+            "Participant Email": "={ $('Get row(s) in sheet1').item.json['Participant Email'] }"
+          },
+          "matchingColumns": [
+            "Participant Email"
+          ],
+          "schema": []
+        },
+        "options": {}
+      },
+      "id": "2e6e22a9-3be3-472f-81d9-9d71f30bf081",
+      "name": "Update row in sheet5",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        540,
+        360
+      ]
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet1": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet4",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update row in sheet5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row in sheet4": {
+      "main": [
+        [
+          {
+            "node": "Download Template Image1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Template Image1": {
+      "main": [
+        [
+          {
+            "node": "Edit Image Name1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Image Name1": {
+      "main": [
+        [
+          {
+            "node": "Edit Image course1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Image course1": {
+      "main": [
+        [
+          {
+            "node": "Edit Image Date1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Image Date1": {
+      "main": [
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message1": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
