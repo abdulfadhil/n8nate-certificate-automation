@@ -85,10 +85,10 @@
           "mappingMode": "defineBelow",
           "value": {
             "Status": "Processing",
-            "Participant Email": "={ $('Get row(s) in sheet1').item.json['Participant Email'] }"
+            "Request ID": "={{ $('Get row(s) in sheet1').item.json['Request ID'] }}"
           },
           "matchingColumns": [
-            "Participant Email"
+            "Request ID"
           ],
           "schema": []
         },
@@ -224,11 +224,11 @@
           "mappingMode": "defineBelow",
           "value": {
             "Status": "Sent",
-            "Participant Email": "={ $('Get row(s) in sheet1').item.json['Participant Email'] }",
-            "Certificate Sent Date": "={{ $now.toISO() }}"
+            "Certificate Sent Date": "={{ $now.toISO() }}",
+            "Request ID": "={{ $('Get row(s) in sheet1').item.json['Request ID'] }}"
           },
           "matchingColumns": [
-            "Participant Email"
+            "Request ID"
           ],
           "schema": []
         },
@@ -259,11 +259,11 @@
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "Status": "={ $('Get row(s) in sheet1').item.json['Status'] }",
-            "Participant Email": "={ $('Get row(s) in sheet1').item.json['Participant Email'] }"
+            "Status": "={{ $('Get row(s) in sheet1').item.json['Status'] }}",
+            "Request ID": "={{ $('Get row(s) in sheet1').item.json['Request ID'] }}"
           },
           "matchingColumns": [
-            "Participant Email"
+            "Request ID"
           ],
           "schema": []
         },
