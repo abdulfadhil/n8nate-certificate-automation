@@ -108,6 +108,22 @@ def main():
                   condition.get("operator", {}).get("operation") == "equals",
                   f"{path.name}: IF must check Status equals Pending", errors)
 
+        if kind == "form":
+            append_columns = by_name.get("Store in Database", {}).get("parameters", {}).get("columns", {})
+            check(append_columns.get("value", {}).get("Request ID") == "={{ $execution.id }}",
+                  "Form workflow must store the current execution ID as Request ID", errors)
+            filter_values = by_name.get("Get row(s) in sheet", {}).get("parameters", {}).get("filtersUI", {}).get("values", [])
+            check(len(filter_values) == 1, "Form workflow must have exactly one Request ID filter", errors)
+            if len(filter_values) == 1:
+                request_filter = filter_values[0]
+                check(request_filter.get("lookupColumn") == "Request ID",
+                      "Form workflow filter must use Request ID", errors)
+                check(request_filter.get("lookupValue") == "={{ $execution.id }}",
+                      "Form workflow filter must use the current execution ID", errors)
+        else:
+            manual_sheet = by_name.get("Get row(s) in sheet1", {}).get("parameters", {})
+            check("filtersUI" not in manual_sheet, "Manual workflow must not filter pending records", errors)
+
         suffix = "" if kind == "form" else "1"
         sheet_node = "Get row(s) in sheet" if kind == "form" else "Get row(s) in sheet1"
         http = by_name.get(f"Download Template Image{suffix}", {}).get("parameters", {})
@@ -145,8 +161,10 @@ def main():
             matching = params.get("matchingColumns", [])
             check(values.get("Status") == status,
                   f"{path.name}: {node_name} must set Status to {status}", errors)
-            check("Participant Email" in values and "Participant Email" in matching,
-                  f"{path.name}: {node_name} must match rows by Participant Email", errors)
+            check("Request ID" in values and matching == ["Request ID"],
+                  f"{path.name}: {node_name} must match rows by Request ID", errors)
+            check(values.get("Request ID") == f"={{{{ $('{sheet_node}').item.json['Request ID'] }}}}",
+                  f"{path.name}: {node_name} must use the current row's Request ID", errors)
             if status == "Sent":
                 check(values.get("Certificate Sent Date") == "={{ $now.toISO() }}",
                       f"{path.name}: {node_name} must record the certificate sent date",
@@ -155,23 +173,29 @@ def main():
         alternate = by_name.get(alternate_name, {}).get("parameters", {}).get("columns", {})
         alternate_values = alternate.get("value", {})
         alternate_match = alternate.get("matchingColumns", [])
-        check(alternate_values.get("Status") == f"={{ $('{sheet_node}').item.json['Status'] }}",
+        check(alternate_values.get("Status") == f"={{{{ $('{sheet_node}').item.json['Status'] }}}}",
               f"{path.name}: alternate branch must preserve existing status", errors)
-        check("Participant Email" in alternate_values and "Participant Email" in alternate_match,
-              f"{path.name}: alternate branch must match rows by Participant Email", errors)
+        check("Request ID" in alternate_values and alternate_match == ["Request ID"],
+              f"{path.name}: alternate branch must match rows by Request ID", errors)
+        check(alternate_values.get("Request ID") == f"={{{{ $('{sheet_node}').item.json['Request ID'] }}}}",
+              f"{path.name}: alternate branch must use the current row's Request ID", errors)
 
     csv_path = ROOT / "Sample Data" / "Sample Participants.csv"
     if csv_path.is_file():
         with csv_path.open(encoding="utf-8", newline="") as handle:
             rows = list(csv.DictReader(handle))
-        expected_columns = {"Participant Name", "Participant Email", "Course name",
-                            "Completion Date", "Status", "Certificate Sent Date"}
+        expected_columns = {"Request ID", "Participant Name", "Participant Email",
+                            "Course name", "Completion Date", "Status",
+                            "Certificate Sent Date"}
         check(bool(rows), "Sample participant data is empty", errors)
         check(expected_columns.issubset(rows[0].keys()) if rows else False,
               "Sample participant data is missing required columns", errors)
-        check(all(row["Participant Email"].lower().endswith("@gmail.com") for row in rows),
-              "Every sample address must use @gmail.com", errors)
+        request_ids = [row.get("Request ID", "").strip() for row in rows]
+        check(all(request_ids), "Every sample record must have a Request ID", errors)
+        check(len(request_ids) == len(set(request_ids)),
+              "Sample Request IDs must be unique", errors)
         emails = [row["Participant Email"].strip().lower() for row in rows]
+        check(all(emails), "Every sample record must have a participant email", errors)
         check(len(emails) == len(set(emails)),
               "Sample participant email addresses must be unique", errors)
 
@@ -191,7 +215,7 @@ def main():
 
     print("PASS: project files, README, project tree, Tech Stack, JSON syntax, workflow nodes,")
     print("      connections, IF rules, status updates, image mapping, Gmail attachment mapping,")
-    print("      timestamp mapping, README links, sample data and excluded-name scan.")
+    print("      timestamp mapping, README links, sample data, Request ID filters, unique sample IDs and excluded-name scan.")
     print("NOTE: live n8n, Google Sheets and Gmail execution are not tested by this script.")
     return 0
 

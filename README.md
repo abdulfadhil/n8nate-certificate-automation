@@ -8,8 +8,8 @@ The project automates certificate creation and delivery using Google Sheets and 
 
 The project includes two workflows:
 
-- **Form Workflow:** Collects new certificate requests.
-- **Manual Workflow:** Processes existing records in Google Sheets.
+- **Form Workflow:** Collects new certificate requests and identifies each request with a unique Request ID.
+- **Manual Workflow:** Processes existing `Pending` records in Google Sheets using their Request IDs.
 
 ## Problem Statement
 
@@ -36,8 +36,8 @@ The workflows collect or read participant details, add them to a certificate tem
 ### Form Workflow
 
 1. Collects the participant's name, email, course and completion date.
-2. Adds the details to Google Sheets with a `Pending` status.
-3. Checks the record status.
+2. Generates a unique Request ID and adds the request to Google Sheets with a `Pending` status.
+3. Retrieves that request using its Request ID and checks its status.
 4. Adds the participant's details to the certificate.
 5. Sends the certificate through Gmail.
 6. Updates the record to `Sent`.
@@ -48,7 +48,7 @@ The workflows collect or read participant details, add them to a certificate tem
 
 1. Reads existing records from Google Sheets.
 2. Checks which records are `Pending`.
-3. Adds participant details to the certificate.
+3. Uses each record's Request ID for status updates and adds participant details to the certificate.
 4. Sends the certificate through Gmail.
 5. Updates the record to `Sent`.
 
@@ -59,6 +59,7 @@ The workflows collect or read participant details, add them to a certificate tem
 | Technology | Purpose |
 |---|---|
 | n8n | Workflow automation |
+| Docker | Local n8n environment |
 | Google Sheets | Participant data and status tracking |
 | Gmail | Certificate email delivery |
 | Python | Local project validation |
@@ -87,30 +88,49 @@ N8NATE Certificate Automation/
 
 ## Getting Started
 
-1. Install and start n8n on your computer using the [official installation guide](https://docs.n8n.io/hosting/installation/).
-2. Open the local n8n address shown by your installation. The default address for a local setup is `http://localhost:5678`.
-3. Create a Google Sheet with these columns: `Participant Name`, `Participant Email`, `Course name`, `Completion Date`, `Status` and `Certificate Sent Date`.
-4. Add the example records from [Sample Participants.csv](Sample%20Data/Sample%20Participants.csv). Replace the sample email addresses with ones you control before testing.
-5. Import both workflow files from the [Workflows folder](Workflows/).
-6. Configure your own Google Sheets and Gmail credentials in n8n. Refer to the [Google credentials guide](https://docs.n8n.io/integrations/builtin/credentials/google/).
-7. Select your Google Sheet and worksheet in the Google Sheets nodes.
-8. Check the certificate template URL and image text positions.
-9. Test the Form Workflow using its test URL. Publish the workflow to receive submissions through its production URL.
-10. Run the Manual Workflow using the Execute Workflow option.
+### 1. Run n8n locally with Docker
+
+1. Install and open [Docker Desktop](https://www.docker.com/products/docker-desktop/).
+2. Open PowerShell and run this command to create the n8n container:
+
+```powershell
+docker run -d --name n8n -p 5678:5678 -v n8n_data:/home/node/.n8n docker.n8n.io/n8nio/n8n
+```
+
+3. Open http://localhost:5678 in your browser.
+4. Complete the initial n8n setup.
+
+If the n8n container already exists and is stopped, start it with:
+
+```powershell
+docker start n8n
+```
+
+### 2. Configure the workflows
+
+1. Create a Google Sheet with these columns: Request ID, Participant Name, Participant Email, Course name, Completion Date, Status and Certificate Sent Date.
+2. Add the example records from [Sample Participants.csv](Sample%20Data/Sample%20Participants.csv). Replace the sample email addresses with ones you control before testing.
+3. Import both workflow JSON files from the [Workflows folder](Workflows/).
+4. Configure your Google Sheets and Gmail credentials in n8n. Refer to the [Google credentials guide](https://docs.n8n.io/integrations/builtin/credentials/google/).
+5. Select your Google Sheet and worksheet in the Google Sheets nodes.
+6. Check the certificate template URL and image text positions.
+7. Test the Form Workflow using its test URL. Publish it to receive submissions through its production URL.
+8. Run the Manual Workflow using the Execute Workflow option.
+
+For existing spreadsheets, add a Request ID column and give every existing record a unique, non-empty ID before running the updated Manual Workflow. For example, use EXISTING-001, EXISTING-002 and so on. Do not reuse IDs. New Form Workflow submissions generate their own Request IDs automatically.
 
 Each user needs their own n8n instance, Google accounts and spreadsheet. The workflows use the shared certificate template in this repository.
-
 ## Testing
 
-Run this command from the project folder:
+The workflows have been tested for certificate generation, Google Sheets updates and Gmail delivery.
+
+Run the validation script from the project folder:
 
 ```bash
 python "Tests/Validate Workflows.py"
 ```
 
-The script checks project files and workflow configuration. It does not execute the workflows or test live Google Sheets and Gmail connections.
-
-Both workflows were also manually tested, including certificate generation, Google Sheets updates and Gmail delivery.
+The script checks project files and workflow configuration.
 
 ## License
 
