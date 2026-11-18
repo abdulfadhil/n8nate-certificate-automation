@@ -67,7 +67,7 @@ def main():
         "## Tech Stack",
         "## Project Structure",
         "## Getting Started",
-        "## Validation",
+        "## Testing",
         "## License",
     ]
     for heading in required_headings:
