@@ -67,33 +67,38 @@ The workflows collect or read participant details, add them to a certificate tem
 
 ```text
 N8NATE Certificate Automation/
-├── README.md
-├── LICENSE
-├── .gitignore
-├── Assets/
-│   ├── Certificate Template.jpg
-│   ├── Sample Certificate.jpg
-│   └── Workflow Screenshot.jpg
-├── Sample Data/
-│   └── Sample Participants.csv
-├── Tests/
-│   └── Validate Workflows.py
-└── Workflows/
-    ├── Form Based Certificate Workflow.json
-    └── Manual Trigger Certificate Workflow.json
+|-- README.md
+|-- LICENSE
+|-- .gitignore
+|-- Assets/
+|   |-- Certificate Template.jpg
+|   |-- Sample Certificate.jpg
+|   |-- Workflow Screenshot.jpg
+|-- Sample Data/
+|   |-- Sample Participants.csv
+|-- Tests/
+|   |-- Validate Workflows.py
+|-- Workflows/
+|   |-- Form Based Certificate Workflow.json
+|   |-- Manual Trigger Certificate Workflow.json
 ```
 
-**Project folders:** [Assets](Assets/) · [Sample Data](Sample%20Data/) · [Tests](Tests/) · [Workflows](Workflows/)
+**Project folders:** [Assets](Assets/) | [Sample Data](Sample%20Data/) | [Tests](Tests/) | [Workflows](Workflows/)
 
 ## Getting Started
 
-1. Create a Google Sheet with these columns: `Participant Name`, `Participant Email`, `Course name`, `Completion Date`, `Status` and `Certificate Sent Date`.
-2. Add the example records from [Sample Participants.csv](Sample%20Data/Sample%20Participants.csv). Replace the sample email addresses with ones you control before testing.
-3. Add your Google Sheets and Gmail credentials in n8n.
-4. Import both workflow files from the [Workflows folder](Workflows/).
-5. Select your Google Sheet and worksheet in the Google Sheets nodes.
-6. Check the certificate template URL and image text positions.
-7. Test with one participant and confirm that the email and spreadsheet update work correctly.
+1. Install and start n8n on your computer using the [official installation guide](https://docs.n8n.io/hosting/installation/).
+2. Open the local n8n address shown by your installation. The default address for a local setup is `http://localhost:5678`.
+3. Create a Google Sheet with these columns: `Participant Name`, `Participant Email`, `Course name`, `Completion Date`, `Status` and `Certificate Sent Date`.
+4. Add the example records from [Sample Participants.csv](Sample%20Data/Sample%20Participants.csv). Replace the sample email addresses with ones you control before testing.
+5. Import both workflow files from the [Workflows folder](Workflows/).
+6. Configure your own Google Sheets and Gmail credentials in n8n. Refer to the [Google credentials guide](https://docs.n8n.io/integrations/builtin/credentials/google/).
+7. Select your Google Sheet and worksheet in the Google Sheets nodes.
+8. Check the certificate template URL and image text positions.
+9. Test the Form Workflow using its test URL. Publish the workflow to receive submissions through its production URL.
+10. Run the Manual Workflow using the Execute Workflow option.
+
+Each user needs their own n8n instance, Google accounts and spreadsheet. The workflows use the shared certificate template in this repository.
 
 ## Testing
 
@@ -103,7 +108,9 @@ Run this command from the project folder:
 python "Tests/Validate Workflows.py"
 ```
 
-The script checks project files and workflow configuration. Both workflows were also manually tested, including certificate generation, Google Sheets updates, and Gmail delivery.
+The script checks project files and workflow configuration. It does not execute the workflows or test live Google Sheets and Gmail connections.
+
+Both workflows were also manually tested, including certificate generation, Google Sheets updates and Gmail delivery.
 
 ## License
 
