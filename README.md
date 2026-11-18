@@ -50,15 +50,12 @@ The form workflow collects the certificate details and adds a record to Google S
 
 ## Tech Stack
 
-- **n8n** for workflow automation.
-- **n8n Form Trigger** for collecting certificate requests.
-- **n8n Manual Trigger** for starting certificate processing.
-- **Google Sheets** for storing recipient records and delivery status.
-- **HTTP Request** for retrieving the certificate template image.
-- **Edit Image** for placing recipient details on the certificate.
-- **IF** for checking record status and controlling workflow paths.
-- **Gmail** for sending the generated certificate as an email attachment.
-- **n8n expressions** for passing recipient and certificate values between nodes.
+| Technology | Purpose |
+|---|---|
+| n8n | Workflow automation |
+| Google Sheets | Participant data and status tracking |
+| Gmail | Certificate email delivery |
+| Python | Local project validation |
 
 ## Project Structure
 

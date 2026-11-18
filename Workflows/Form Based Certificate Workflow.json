@@ -299,7 +299,7 @@
       "parameters": {
         "sendTo": "={{ $('Get row(s) in sheet').item.json['Participant Email'] }}",
         "subject": "=Your certificate: {{ $('Get row(s) in sheet').item.json['Participant Name'] }}",
-        "message": "=Hello {{ $('Get row(s) in sheet').item.json['Participant Name'] }},\\n\\nYour certificate is attached. Thank you for taking part.\\n\\nBest regards",
+        "message": "=Hello {{ $('Get row(s) in sheet').item.json['Participant Name'] }},\n\nYour certificate is attached. Thank you for taking part.\n\nBest regards",
         "options": {
           "attachmentsUi": {
             "attachmentsBinary": [
@@ -338,7 +338,8 @@
           "mappingMode": "defineBelow",
           "value": {
             "Status": "Sent",
-            "Participant Email": "={ $('Get row(s) in sheet').item.json['Participant Email'] }"
+            "Participant Email": "={ $('Get row(s) in sheet').item.json['Participant Email'] }",
+            "Certificate Sent Date": "={{ $now.toISO() }}"
           },
           "matchingColumns": [
             "Participant Email"

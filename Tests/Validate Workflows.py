@@ -2,6 +2,7 @@
 """Run local structural checks for the N8NATE Certificate Automation project."""
 import csv
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -48,6 +49,30 @@ def main():
     check("## Repository" not in readme and "github.com/abdulfadhil/" not in readme,
           "README should not link back to its own repository", errors)
     check("N8NATE Certificate Automation/" in readme, "Project folder name is inconsistent", errors)
+
+    image_references = re.findall(r"!\[[^\]]*\]\(([^)]+)\)", readme)
+    check(len(image_references) == 3,
+          "README must reference exactly three project images", errors)
+    for reference in image_references:
+        image_path = ROOT / reference.replace("%20", " ")
+        check(image_path.is_file(),
+              f"README image reference is missing: {reference}", errors)
+
+    required_headings = [
+        "## Project Overview",
+        "## Problem Statement",
+        "## Solution",
+        "## Workflow Preview",
+        "## Workflow Overview",
+        "## Tech Stack",
+        "## Project Structure",
+        "## Getting Started",
+        "## Validation",
+        "## License",
+    ]
+    for heading in required_headings:
+        check(heading in readme,
+              f"README section is missing: {heading}", errors)
 
     for kind, path in WORKFLOWS.items():
         check(path.is_file(), f"Missing workflow: {path.name}", errors)
@@ -122,6 +147,10 @@ def main():
                   f"{path.name}: {node_name} must set Status to {status}", errors)
             check("Participant Email" in values and "Participant Email" in matching,
                   f"{path.name}: {node_name} must match rows by Participant Email", errors)
+            if status == "Sent":
+                check(values.get("Certificate Sent Date") == "={{ $now.toISO() }}",
+                      f"{path.name}: {node_name} must record the certificate sent date",
+                      errors)
 
         alternate = by_name.get(alternate_name, {}).get("parameters", {}).get("columns", {})
         alternate_values = alternate.get("value", {})
@@ -142,6 +171,9 @@ def main():
               "Sample participant data is missing required columns", errors)
         check(all(row["Participant Email"].lower().endswith("@gmail.com") for row in rows),
               "Every sample address must use @gmail.com", errors)
+        emails = [row["Participant Email"].strip().lower() for row in rows]
+        check(len(emails) == len(set(emails)),
+              "Sample participant email addresses must be unique", errors)
 
     for path in ROOT.rglob("*"):
         if path.is_file() and path != Path(__file__) and path.suffix.lower() in {".md", ".txt", ".json", ".py", ".csv"}:
@@ -159,7 +191,7 @@ def main():
 
     print("PASS: project files, README, project tree, Tech Stack, JSON syntax, workflow nodes,")
     print("      connections, IF rules, status updates, image mapping, Gmail attachment mapping,")
-    print("      Gmail sample address format and excluded-name scan.")
+    print("      timestamp mapping, README links, sample data and excluded-name scan.")
     print("NOTE: live n8n, Google Sheets and Gmail execution are not tested by this script.")
     return 0
 
