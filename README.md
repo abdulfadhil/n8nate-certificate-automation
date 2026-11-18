@@ -1,52 +1,58 @@
 # N8NATE Certificate Automation
 
-An n8n automation project developed for the N8NATE competition in November 2025, where it secured First Place. N8NATE was part of a National Level Technical Symposium held at Meenakshi Sundararajan Engineering College in Chennai, Tamil Nadu. The project demonstrates how certificate requests can be collected, recorded in Google Sheets, personalised using an image template and delivered to recipients through Gmail.
+An n8n project developed for the N8NATE competition in November 2025, where it secured First Place. The competition was part of a National Level Technical Symposium at Meenakshi Sundararajan Engineering College, Chennai, Tamil Nadu.
+
+The project automates certificate creation and delivery using Google Sheets and Gmail.
 
 ## Project Overview
 
-The automation manages the main steps involved in preparing and distributing completion certificates. It uses a form based workflow for new requests and a manual workflow for processing records already stored in Google Sheets.
+The project includes two workflows:
+
+- **Form Workflow:** Collects new certificate requests.
+- **Manual Workflow:** Processes existing records in Google Sheets.
 
 ## Problem Statement
 
-Preparing certificates manually means entering recipient details on each certificate, saving the result and sending it to the right email address. It also takes extra effort to track which certificates are waiting to be processed and which have been sent.
+Creating certificates manually takes time. Participant details must be added to each certificate, emails must be sent, and delivery status must be tracked.
 
 ## Solution
 
-The project uses two n8n workflows to manage certificate generation and delivery.
-
-The form workflow collects the certificate details and adds a record to Google Sheets. The manual workflow starts on demand and reads existing records. Each workflow checks the record status before processing, retrieves the certificate template, adds the recipient details to the image, sends the certificate through Gmail and updates the spreadsheet.
+The workflows collect or read participant details, add them to a certificate template, send the certificate through Gmail, and update the record in Google Sheets.
 
 ## Workflow Preview
 
-![N8NATE certificate automation workflows](Assets/Workflow%20Screenshot.jpg)
+[![N8NATE Workflow Screenshot](Assets/Workflow%20Screenshot.jpg)](Assets/Workflow%20Screenshot.jpg)
 
-### Certificate Template
+## Certificate Template
 
-![Certificate template](Assets/Certificate%20Template.jpg)
+[![Certificate Template](Assets/Certificate%20Template.jpg)](Assets/Certificate%20Template.jpg)
 
-### Sample Certificate
+## Sample Certificate
 
-![Sample certificate](Assets/Sample%20Certificate.jpg)
+[![Sample Certificate](Assets/Sample%20Certificate.jpg)](Assets/Sample%20Certificate.jpg)
 
 ## Workflow Overview
 
 ### Form Workflow
 
-1. **Form** collects the recipient name, email address, course and completion date.
-2. **Store in Database** adds the submission to Google Sheets with a `Pending` status.
-3. **Get row(s) in sheet** reads the spreadsheet records.
-4. **IF** checks whether the record is pending.
-5. The processing branch updates the record to `Processing`.
-6. **Download Template Image** retrieves the certificate template. The Edit Image nodes add the recipient name, course and completion date.
-7. **Send a message** sends the certificate through Gmail. The final Google Sheets node updates the record to `Sent`. The alternate branch leaves the existing status unchanged.
+1. Collects the participant's name, email, course and completion date.
+2. Adds the details to Google Sheets with a `Pending` status.
+3. Checks the record status.
+4. Adds the participant's details to the certificate.
+5. Sends the certificate through Gmail.
+6. Updates the record to `Sent`.
+
+[View Form Based Certificate Workflow](Workflows/Form%20Based%20Certificate%20Workflow.json)
 
 ### Manual Workflow
 
-1. **When clicking ‘Execute workflow’** starts the workflow.
-2. **Get row(s) in sheet1** reads the spreadsheet records.
-3. **If1** checks whether the record is pending.
-4. The processing branch updates the record to `Processing`, retrieves the template and adds the recipient details.
-5. **Send a message1** sends the certificate through Gmail. The final Google Sheets node updates the record to `Sent`. The alternate branch leaves the existing status unchanged.
+1. Reads existing records from Google Sheets.
+2. Checks which records are `Pending`.
+3. Adds participant details to the certificate.
+4. Sends the certificate through Gmail.
+5. Updates the record to `Sent`.
+
+[View Manual Trigger Certificate Workflow](Workflows/Manual%20Trigger%20Certificate%20Workflow.json)
 
 ## Tech Stack
 
@@ -77,27 +83,28 @@ N8NATE Certificate Automation/
     └── Manual Trigger Certificate Workflow.json
 ```
 
+**Project folders:** [Assets](Assets/) · [Sample Data](Sample%20Data/) · [Tests](Tests/) · [Workflows](Workflows/)
+
 ## Getting Started
 
-1. Create a Google Sheet with the columns `Participant Name`, `Participant Email`, `Course name`, `Completion Date`, `Status` and `Certificate Sent Date`.
-2. Import `Sample Data/Sample Participants.csv` to add example records. Each sample address follows the `name@gmail.com` format and is illustrative. Replace it with a Gmail address you own before testing email delivery.
-3. Add Google Sheets and Gmail credentials in n8n.
-4. Import both workflow JSON files from the `Workflows` folder.
-5. Select your Google Sheet and worksheet in each Google Sheets node.
-6. Confirm that the HTTP Request nodes use the certificate template URL from this repository.
-7. Check the name, course and date positions in the Edit Image nodes against the included certificate template.
-8. Test with one record and an email address you control. Confirm that the certificate arrives as an attachment and that the spreadsheet status changes to `Sent`.
+1. Create a Google Sheet with these columns: `Participant Name`, `Participant Email`, `Course name`, `Completion Date`, `Status` and `Certificate Sent Date`.
+2. Add the example records from [Sample Participants.csv](Sample%20Data/Sample%20Participants.csv). Replace the sample email addresses with ones you control before testing.
+3. Add your Google Sheets and Gmail credentials in n8n.
+4. Import both workflow files from the [Workflows folder](Workflows/).
+5. Select your Google Sheet and worksheet in the Google Sheets nodes.
+6. Check the certificate template URL and image text positions.
+7. Test with one participant and confirm that the email and spreadsheet update work correctly.
 
 ## Validation
 
-Run the validation script from the project folder:
+Run this command from the project folder:
 
 ```bash
 python "Tests/Validate Workflows.py"
 ```
 
-The script checks the workflow JSON, required nodes, connections, status conditions, image handling, Gmail attachment mapping, sample data and project assets. It does not connect to Google Sheets or Gmail. A successful local check therefore does not confirm live email delivery.
+The script checks the project files, workflow structure, connections, mappings, sample data and assets. It does not test live Google Sheets or Gmail delivery.
 
 ## License
 
-This project is licensed under the MIT License.
+This project is licensed under the [MIT License](LICENSE).
