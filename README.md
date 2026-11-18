@@ -95,7 +95,7 @@ N8NATE Certificate Automation/
 6. Check the certificate template URL and image text positions.
 7. Test with one participant and confirm that the email and spreadsheet update work correctly.
 
-## Validation
+## Testing
 
 Run this command from the project folder:
 
@@ -103,7 +103,7 @@ Run this command from the project folder:
 python "Tests/Validate Workflows.py"
 ```
 
-The script checks the project files, workflow structure, connections, mappings, sample data and assets. It does not test live Google Sheets or Gmail delivery.
+The script checks project files and workflow configuration. Both workflows were also manually tested, including certificate generation, Google Sheets updates, and Gmail delivery.
 
 ## License
 
