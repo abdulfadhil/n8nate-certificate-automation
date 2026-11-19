@@ -1,8 +1,8 @@
 # N8NATE Certificate Automation
 
-An n8n project developed in November 2025 for N8NATE (Automation AI Agents Hackathon), where it secured First Place. The competition was held as part of EUPHORIA 2K25, a techno-cultural fest at Meenakshi Sundararajan Engineering College, Chennai.
+A certificate automation workflow built using n8n. It automates certificate creation and delivery through Google Sheets and Gmail.
 
-The project automates certificate creation and delivery using Google Sheets and Gmail.
+The project was developed in November 2025 for N8NATE (Automation AI Agents Hackathon), where it secured First Place. N8NATE was part of EUPHORIA 2K25, a techno-cultural fest at Meenakshi Sundararajan Engineering College, Chennai.
 
 ## Project Overview
 
